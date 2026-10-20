@@ -16,6 +16,8 @@ Use Unity 6000.6.5f1 and open `UnityProject`. Start from `Assets/Afterglow/Scene
 
 ## Raspberry Pi access
 
-Clone or download this repository on the Pi to browse and edit the source files and art. The project folder is `UnityProject/`. The included artwork sources are in `UnityProject/Tools/AfterglowArtSource/source/overrides/`.
+Clone or download this repository on the Pi to browse or edit the source files and artwork. The Unity project is in `UnityProject/`.
+
+The Pi can access the project files, but Unity 6's documented Linux Editor target is x64; a typical ARM based Raspberry Pi cannot run that Editor natively. Open and play the project on a compatible desktop with Unity 6000.6.5f1.
 
 Made by Jaiden Asruf
