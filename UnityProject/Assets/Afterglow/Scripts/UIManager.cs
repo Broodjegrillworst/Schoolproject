@@ -28,7 +28,6 @@ namespace Afterglow
         private GameObject quickMenuRoot;
         private Text notificationText;
         private Text healthText;
-        private Text chainText;
         private Text targetText;
         private Text controlText;
         private Text ultimateText;
@@ -46,6 +45,7 @@ namespace Afterglow
         private bool settingsFromPause;
         private bool interactionNear;
         private bool interactionIsShortcut;
+        private bool interactionIsBreakableWall;
         private string markedLabel;
         private bool perfectPrompt;
         private string quickMode;
@@ -76,7 +76,7 @@ namespace Afterglow
             Button(menuRoot.transform, "HOOFDSTUKKEN", ShowLevelSelect, false, new Vector2(500, 58), 17, new Vector2(0, -41));
             Button(menuRoot.transform, "INSTELLINGEN", ShowSettings, false, new Vector2(500, 58), 17, new Vector2(0, -114));
             Button(menuRoot.transform, "CREDITS", ShowCredits, false, new Vector2(500, 58), 17, new Vector2(0, -187));
-            AddText(menuRoot.transform, "A/D BEWEGEN  •  SPACE SPRINGEN  •  LMB VUUR / LADEN  •  RMB RELIEKSTOOT  •  Q MERK  •  SHIFT DASH",
+            AddText(menuRoot.transform, "A/D BEWEGEN  •  SPACE SPRINGEN  •  LMB PRIMAIR WAPEN  •  RMB RELIEKSTOOT  •  E INTERACT  •  ESC PAUZE",
                 11, FontStyle.Normal, new Color(.72f, .69f, .61f), new Vector2(600, 30), new Vector2(0, -235));
             AddText(menuRoot.transform, "Made by Jaiden Asruf", 16, FontStyle.Bold, AccentBright, new Vector2(560, 34), new Vector2(0, -275));
             BuildSettingsOverlay();
@@ -174,32 +174,28 @@ namespace Afterglow
             hudRect.anchorMin = Vector2.zero; hudRect.anchorMax = Vector2.one; hudRect.offsetMin = Vector2.zero; hudRect.offsetMax = Vector2.zero;
             var left = Panel(hudRoot.transform, "Hero status", new Vector2(330, 86), new Vector2(-775, 475), new Color(.025f, .026f, .027f, .9f));
             healthText = AddText(left.transform, "VITALITEIT  04 / 04", 18, FontStyle.Bold, new Color(.82f, .79f, .71f), new Vector2(300, 32), new Vector2(0, 18), TextAnchor.MiddleLeft, new Vector2(18, 0));
-            ultimateText = AddText(left.transform, "WORTELHART  00%  •  R", 13, FontStyle.Bold, AccentBright, new Vector2(300, 28), new Vector2(0, -19), TextAnchor.MiddleLeft, new Vector2(18, 0));
+            ultimateText = AddText(left.transform, "WORTELHART  00%", 13, FontStyle.Bold, AccentBright, new Vector2(300, 28), new Vector2(0, -19), TextAnchor.MiddleLeft, new Vector2(18, 0));
 
             var objective = Panel(hudRoot.transform, "Chapter label", new Vector2(480, 82), new Vector2(0, 476), new Color(.025f, .026f, .027f, .86f));
             AddText(objective.transform, "HOOFDSTUK 0" + (stageIndex + 1), 17, FontStyle.Bold, Accent, new Vector2(440, 28), new Vector2(0, 18));
             AddText(objective.transform, StageTitle(stageIndex), 22, FontStyle.Bold, Color.white, new Vector2(440, 34), new Vector2(0, -15));
 
-            var combo = Panel(hudRoot.transform, "Rebound chain", new Vector2(330, 78), new Vector2(0, 392), new Color(.025f, .026f, .027f, .88f));
-            chainText = AddText(combo.transform, "KETEN  0", 20, FontStyle.Bold, AccentBright, new Vector2(300, 50), Vector2.zero);
-
             var right = Panel(hudRoot.transform, "Run details", new Vector2(310, 82), new Vector2(780, 478), new Color(.025f, .026f, .027f, .9f));
             timerText = AddText(right.transform, "00:00", 17, FontStyle.Bold, new Color(.78f, .76f, .69f), new Vector2(100, 42), new Vector2(-72, 0));
             Button(right.transform, "II  PAUZE", () => TogglePause(true), false, new Vector2(130, 48), 14, new Vector2(78, 0));
             var targetPanel = Panel(hudRoot.transform, "Oathroot controls", new Vector2(1060, 76), new Vector2(0, -465), new Color(.025f, .026f, .027f, .9f));
-            controlText = AddText(targetPanel.transform, "LMB VUUR  •  HOUD VAST OM TE LADEN     RMB RELIEKSTOOT     Q PULSMERK     SHIFT DASH", 13, FontStyle.Bold, new Color(.86f,.83f,.75f), new Vector2(1020, 28), new Vector2(0, 17));
-            targetText = AddText(targetPanel.transform, "A/D BEWEGEN     SPACE SPRINGEN     E INTERACT     TAB KAART     M WERELDKAART     C PERSONAGE     R ULTIMAAT", 12, FontStyle.Normal, MutedText, new Vector2(1020, 28), new Vector2(0, -16));
+            controlText = AddText(targetPanel.transform, "LMB PRIMAIR  •  HOUD VAST OM TE LADEN     RMB SECUNDAIR", 13, FontStyle.Bold, new Color(.86f,.83f,.75f), new Vector2(1020, 28), new Vector2(0, 17));
+            targetText = AddText(targetPanel.transform, "A/D BEWEGEN     SPACE SPRINGEN     E INTERACT     ESC PAUZE", 12, FontStyle.Normal, MutedText, new Vector2(1020, 28), new Vector2(0, -16));
             player.HealthChanged += UpdateHealth;
-            player.ChainChanged += UpdateChain;
             UpdateHealth(player.Health, player.MaximumHealth);
             UpdateUltimate(player.UltimatePercent);
         }
 
         private void BuildBossBar()
         {
-            bossBarRoot = new GameObject("Boss mastery bar");
+            bossBarRoot = new GameObject("Boss health bar");
             bossBarRoot.transform.SetParent(canvas.transform, false);
-            var panel = Panel(bossBarRoot.transform, "Boss mastery plate", new Vector2(700, 84), new Vector2(0, 300), new Color(.025f, .026f, .027f, .96f));
+            var panel = Panel(bossBarRoot.transform, "Boss health plate", new Vector2(700, 84), new Vector2(0, 300), new Color(.025f, .026f, .027f, .96f));
             AddText(panel.transform, "", 17, FontStyle.Bold, Color.white, new Vector2(650, 28), new Vector2(0, 19), TextAnchor.MiddleCenter);
             bossSlider = Slider(panel.transform, new Vector2(630, 18), new Vector2(0, -18), Accent);
             bossBarRoot.SetActive(false);
@@ -236,7 +232,7 @@ namespace Afterglow
             else
             {
                 quickMenuTitle.text = "MARA VALE  •  KLOKBEWAARDER";
-                quickMenuBody.text = "WAPEN\nOATHROOT — een familiekanon van zwart ijzer, messing en een levende blauwe kristalkern. LMB vuurt; vasthouden laadt een doorborend reliekschot.\n\nTECHNIEKEN\nRMB Reliekstoot: nabije vijanden onderbreken. Q Pulsmerk: bindt één rebound-doel. Shift dash naar een markering of in je bewegingsrichting. Perfect rebound door Shift op de inslag.\n\nWORTELHART\nLading " + (player != null ? player.UltimatePercent : 0) + "%  •  R ontketent de ultieme puls.\n\nHAAR SPOOR\nMara zoekt Elin, haar zus, via drie laatste herinneringen in de ruïnes.";
+                quickMenuBody.text = "WAPEN\nOATHROOT — Mara's familiekanon, gesmeed uit zwart ijzer en messing rond een levende blauwe kristalkern. LMB vuurt; vasthouden laadt een zwaardere, doorborende reliekschot.\n\nTECHNIEK\nRMB ontketent een reliekstoot die vijanden onderbreekt en vijandelijke projectielen breekt. Zodra het Wortelhart vol is, wordt dezelfde knop een krachtige ontlading.\n\nHAAR SPOOR\nMara volgt Elins laatste belslagen door drie vergeten heiligdommen.";
             }
             quickMenuRoot.SetActive(true);
             IsPaused = true;
@@ -251,30 +247,23 @@ namespace Afterglow
             Time.timeScale = 1f;
         }
 
-        public void ShowBossMastery(string bossName, int completed, int required, int chainRequired)
+        public void ShowBossHealth(string bossName, int current, int maximum, int phase, int phaseCount)
         {
             if (bossBarRoot == null) return;
             bossBarRoot.SetActive(true);
-            var label = bossBarRoot.GetComponentInChildren<Text>();
-            if (label != null) label.text = bossName + "  •  ZEGELS " + completed + " / " + required + "  •  KETEN " + chainRequired + " NODIG";
-            UpdateBossMastery(completed, required);
+            UpdateBossHealth(bossName, current, maximum, phase, phaseCount);
         }
-        public void UpdateBossMastery(int completed, int required)
+
+        public void UpdateBossHealth(string bossName, int current, int maximum, int phase, int phaseCount)
         {
-            if (bossSlider != null) bossSlider.value = required <= 0 ? 0 : Mathf.Clamp01(completed / (float)required) * 100f;
+            if (bossSlider != null) bossSlider.value = maximum <= 0 ? 0 : Mathf.Clamp01(current / (float)maximum) * 100f;
             if (bossBarRoot != null)
             {
-                var label = bossBarRoot.GetComponentInChildren<Text>();
-                if (label != null)
-                {
-                    string[] parts = label.text.Split('•');
-                    string name = parts.Length > 0 ? parts[0].Trim() : "WACHTER";
-                    string chainRequirement = parts.Length > 2 ? parts[2].Trim() : "KETEN NODIG";
-                    label.text = name + "  •  ZEGELS " + completed + " / " + required + "  •  " + chainRequirement;
-                }
+                Text label = bossBarRoot.GetComponentInChildren<Text>();
+                if (label != null) label.text = bossName + "  •  FASE " + phase + " / " + phaseCount;
             }
         }
-        public void HideBossMastery() { if (bossBarRoot != null) bossBarRoot.SetActive(false); }
+        public void HideBossHealth() { if (bossBarRoot != null) bossBarRoot.SetActive(false); }
 
         public void ShowMarkedTarget(string label)
         {
@@ -296,17 +285,18 @@ namespace Afterglow
             RefreshControlHint();
         }
 
-        public void SetInteractionHint(bool nearby, bool shortcut = false)
+        public void SetInteractionHint(bool nearby, bool shortcut = false, bool breakableWall = false)
         {
             interactionNear = nearby;
             interactionIsShortcut = nearby && shortcut;
+            interactionIsBreakableWall = nearby && breakableWall;
             RefreshControlHint();
         }
 
         public void UpdateUltimate(int amount)
         {
             if (ultimateText == null) return;
-            ultimateText.text = amount >= 100 ? "WORTELHART VOL  •  R VUUR" : "WORTELHART  " + Mathf.Clamp(amount, 0, 100).ToString("00") + "%  •  R";
+            ultimateText.text = amount >= 100 ? "WORTELHART VOL  •  RMB ONTLADEN" : "WORTELHART  " + Mathf.Clamp(amount, 0, 100).ToString("00") + "%";
             ultimateText.color = amount >= 100 ? new Color(.97f,.79f,.46f) : AccentBright;
         }
 
@@ -314,23 +304,15 @@ namespace Afterglow
         {
             if (controlText == null) return;
             if (amount > 0f) controlText.text = "OATHROOT LADEN  " + Mathf.RoundToInt(amount * 100f) + "%  •  LAAT LMB LOS VOOR DE RELIEKSCHOT";
-            else controlText.text = "LMB VUUR  •  HOUD VAST OM TE LADEN     RMB RELIEKSTOOT     Q PULSMERK     SHIFT DASH";
+            else controlText.text = "LMB PRIMAIR  •  HOUD VAST OM TE LADEN     RMB SECUNDAIR";
         }
 
         private void RefreshControlHint()
         {
             if (targetText == null) return;
-            if (perfectPrompt) targetText.text = "NU!  •  DRUK SHIFT OP DE INSLAANDE BELSLAG VOOR PERFECTE PULSE REBOUND";
-            else if (!string.IsNullOrEmpty(markedLabel)) targetText.text = "Q GEMERKT: " + markedLabel + "  •  SHIFT ERNAARTOE  •  SHIFT BIJ IMPACT = REBOUND";
+            if (interactionIsBreakableWall) targetText.text = "E OF LMB  •  OPEN DE GEBARSTEN ZEGEL";
             else if (interactionNear) targetText.text = interactionIsShortcut ? "E  •  GEBRUIK DE VERBORGEN WORTELDOORGANG" : "E  •  ONDERZOEK ELINS HERINNERING";
-            else targetText.text = "A/D BEWEGEN     SPACE SPRINGEN     E INTERACT     TAB KAART     M WERELDKAART     C PERSONAGE     R ULTIMAAT";
-        }
-
-        public void UpdateChain(int chain, bool perfect)
-        {
-            if (chainText == null) return;
-            chainText.text = chain <= 0 ? "KETEN  0" : "KETEN  " + chain.ToString("00") + (perfect ? "  •  PERFECT" : "");
-            chainText.color = perfect ? new Color(.9f, .79f, .52f) : AccentBright;
+            else targetText.text = "A/D BEWEGEN     SPACE SPRINGEN     E INTERACT     ESC PAUZE";
         }
 
         private void BuildSettingsOverlay()
@@ -344,8 +326,7 @@ namespace Afterglow
             AddSettingSlider(settingsRoot.transform, "Muziek", 88, AfterglowSession.Profile.musicVolume, value => { AfterglowSession.SetAudio(AfterglowSession.Profile.masterVolume, value, AfterglowSession.Profile.effectsVolume); AfterglowAudio.Instance?.ApplyVolumes(); });
             AddSettingSlider(settingsRoot.transform, "Geluidseffecten", 14, AfterglowSession.Profile.effectsVolume, value => { AfterglowSession.SetAudio(AfterglowSession.Profile.masterVolume, AfterglowSession.Profile.musicVolume, value); AfterglowAudio.Instance?.ApplyVolumes(); });
             AddText(settingsRoot.transform, "BESTURING", 15, FontStyle.Bold, Accent, new Vector2(590, 30), new Vector2(0, -72));
-            AddText(settingsRoot.transform, "A/D bewegen • SPACE springen • LMB vuur (vasthouden = laden) • RMB reliekstoot • SHIFT dash • Q pulsmerk", 14, FontStyle.Normal, MutedText, new Vector2(630, 46), new Vector2(0, -112));
-            AddText(settingsRoot.transform, "E interact • R ultiem (na opladen) • ESC pauze • TAB kaart • M wereldkaart • C personage", 13, FontStyle.Normal, MutedText, new Vector2(630, 42), new Vector2(0, -152));
+            AddText(settingsRoot.transform, "A/D bewegen • SPACE springen • LMB primair • RMB secundair • E interact • ESC pauze", 14, FontStyle.Normal, MutedText, new Vector2(630, 46), new Vector2(0, -112));
             shakeButtonText = Button(settingsRoot.transform, "SCHERMBEWEGING: " + (AfterglowSession.Profile.screenShake ? "AAN" : "UIT"), () =>
             {
                 AfterglowSession.SetScreenShake(!AfterglowSession.Profile.screenShake);
@@ -425,10 +406,11 @@ namespace Afterglow
         {
             gameOverRoot = NewPanel("Game over overlay", new Vector2(620, 570), Vector2.zero, new Color(.08f, .035f, .03f, .985f));
             gameOverRoot.SetActive(false);
-            AddText(gameOverRoot.transform, "KETEN GEBROKEN", 46, FontStyle.Bold, new Color(.78f, .43f, .38f), new Vector2(560, 80), new Vector2(0, 205));
-            AddText(gameOverRoot.transform, "Probeer het reboundpad opnieuw vanaf je herinnering.", 18, FontStyle.Normal, MutedText, new Vector2(560, 42), new Vector2(0, 143));
+            AddText(gameOverRoot.transform, "DE BEL VERSTOMT", 46, FontStyle.Bold, new Color(.78f, .43f, .38f), new Vector2(560, 80), new Vector2(0, 205));
+            AddText(gameOverRoot.transform, "Mara keert terug naar het laatste rustpunt.", 18, FontStyle.Normal, MutedText, new Vector2(560, 42), new Vector2(0, 143));
             Button(gameOverRoot.transform, "OPNIEUW VANAF CHECKPOINT", RestartFromCheckpoint, true, new Vector2(470, 64), 17, new Vector2(0, 46));
             Button(gameOverRoot.transform, "HOOFDMENU", LoadMenu, false, new Vector2(470, 58), 16, new Vector2(0, -42));
+            AddText(gameOverRoot.transform, "Made by Jaiden Asruf", 16, FontStyle.Bold, AccentBright, new Vector2(560, 32), new Vector2(0, -132));
         }
 
         private void BuildStageCompleteOverlay()
@@ -455,7 +437,7 @@ namespace Afterglow
                     : "Mara vindt Elin in de verzegelde tempelkamer. Het Wortelhart komt tot rust, maar hun familielied blijft onvolledig. Boven wacht het herboren woud."
             };
             AddText(stageCompleteRoot.transform, chapterEndings[Mathf.Clamp(stage, 0, 2)], 18, FontStyle.Normal, new Color(.78f, .75f, .67f), new Vector2(590, 92), new Vector2(0, 142));
-            AddText(stageCompleteRoot.transform, "TIJD  " + FormatTime(AfterglowSession.RunSeconds) + "    BESTE KETEN  " + (player != null ? player.BestChain : 0) + "    HERINNERINGEN  " + AfterglowSession.RecoveredMemoryCount + " / 3",
+            AddText(stageCompleteRoot.transform, "TIJD  " + FormatTime(AfterglowSession.RunSeconds) + "    HERINNERINGEN  " + AfterglowSession.RecoveredMemoryCount + " / 3",
                 16, FontStyle.Bold, AccentBright, new Vector2(600, 42), new Vector2(0, 66));
             if (ending) AddText(stageCompleteRoot.transform, "Made by Jaiden Asruf", 18, FontStyle.Bold, AccentBright, new Vector2(590, 36), new Vector2(0, 8));
             Button(stageCompleteRoot.transform, ending ? "TERUG NAAR HOOFDMENU" : "VOLGEND HOOFDSTUK", () =>

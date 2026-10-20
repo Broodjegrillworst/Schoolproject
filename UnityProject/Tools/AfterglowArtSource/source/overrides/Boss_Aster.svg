@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="720" viewBox="0 0 640 720">
+  <defs>
+    <linearGradient id="robe" x2=".8" y2="1"><stop stop-color="#56505a"/><stop offset=".38" stop-color="#302d3a"/><stop offset="1" stop-color="#171923"/></linearGradient>
+    <linearGradient id="gold" x2="1" y2="1"><stop stop-color="#f0d18b"/><stop offset=".5" stop-color="#a18150"/><stop offset="1" stop-color="#4a3e38"/></linearGradient>
+    <radialGradient id="eclipse"><stop stop-color="#fff0bd"/><stop offset=".18" stop-color="#e66a58"/><stop offset=".47" stop-color="#9e2c4b"/><stop offset="1" stop-color="#301d36"/></radialGradient>
+  </defs>
+  <!-- A broken astrolabe halo floats behind a narrow, ungrounded silhouette. -->
+  <circle cx="319" cy="148" r="120" fill="none" stroke="#766044" stroke-width="13" stroke-dasharray="188 24 56 18 147 36" transform="rotate(-17 319 148)"/>
+  <circle cx="319" cy="148" r="88" fill="none" stroke="#c4a36a" stroke-width="5" opacity=".88"/>
+  <path d="M319 20v52m-128 76h50m207 0h50m-179-127v46m0 201v37m-112-202 39 24m146 89 39 24m0-136-39 24m-146 89-39 24" stroke="#d3b475" stroke-width="6"/>
+  <path d="M318 20q-57 69 2 112 57-50-2-112Z" fill="#a8364e" stroke="#f0ce82" stroke-width="9"/>
+  <circle cx="319" cy="141" r="19" fill="url(#eclipse)" stroke="#e3bd75" stroke-width="6"/>
+  <!-- Three hovering reliquary shards replace ordinary shoulders and hands. -->
+  <path d="M120 286q-42-49-22-116 59 35 68 98l-16 70Z" fill="#37313b" stroke="#b39158" stroke-width="9"/>
+  <path d="M527 242q-18-69 37-119 37 62 4 121l-31 48Z" fill="#37313b" stroke="#b39158" stroke-width="9"/>
+  <path d="M513 468q63-39 105 6-44 58-103 42l-36-20Z" fill="#37313b" stroke="#b39158" stroke-width="9"/>
+  <path d="M133 255q23-12 43 0m353-22q18-17 37-6m-5 257q22-11 43 1" fill="none" stroke="#dfbe79" stroke-width="6"/>
+  <!-- Head is a hollow eclipse mask; there is no human face behind it. -->
+  <path d="M232 152Q263 98 322 91q74 7 104 65l-20 139q-74 72-152 0Z" fill="#2e2d39" stroke="#a98955" stroke-width="12"/>
+  <path d="M265 185q50-55 112-5l-7 63q-48 43-98 0Z" fill="#101722" stroke="#56444a" stroke-width="6"/>
+  <circle cx="320" cy="218" r="32" fill="url(#eclipse)"/>
+  <path d="M299 213q23-14 42 1" fill="none" stroke="#fff0c0" stroke-width="7"/>
+  <path d="M269 273q51 20 104-3m-77 29 47 0" fill="none" stroke="#bb965d" stroke-width="6"/>
+  <path d="M271 292Q320 327 386 290L430 475Q326 549 211 470Z" fill="url(#robe)" stroke="#171a23" stroke-width="17"/>
+  <path d="M286 329q35 29 72 5m-88 41q50 30 103 5m-112 44q61 34 122 4" fill="none" stroke="#94764f" stroke-width="7"/>
+  <path d="M319 311q-52 59 0 120 54-61 0-120Z" fill="#83283e" stroke="#d0ad6f" stroke-width="10"/>
+  <path d="M320 339q-25 38 0 65 27-34 0-65Z" fill="#ffe4a0"/>
+  <!-- Arms taper into two suspended blades, so Aster's silhouette stays readable in motion. -->
+  <path d="M247 316 186 366l-59 108 40 42 89-95m151-107 63 44 53 126-45 31-83-103" fill="none" stroke="#383540" stroke-width="31" stroke-linecap="round"/>
+  <path d="M162 485q-34 51-14 118 24 34 56 1 35-44 2-110Z" fill="#272632" stroke="url(#gold)" stroke-width="10"/>
+  <path d="M488 443q47 26 57 83l-20 83q-36 27-57-11-22-54 20-155Z" fill="#272632" stroke="url(#gold)" stroke-width="10"/>
+  <path d="M193 603v46m-18-32h37m270-28v51m-18-32h38" stroke="#ddba75" stroke-width="7"/>
+  <path d="M260 464 235 656q90 72 179 0l-28-193q-58 42-126 1Z" fill="#242531" stroke="#a88b56" stroke-width="12"/>
+  <path d="M285 493q35 20 69 0m-77 42q43 20 85 0m-75 43q33 18 64 0" fill="none" stroke="#765b49" stroke-width="7"/>
+  <path d="M277 654h-62m210 0h-62" stroke="#b79861" stroke-width="10"/>
+  <path d="m265 84-31-44m139 37 37-43m-218 230-41 21m337 3 45 24" stroke="#bd9e66" stroke-width="8"/>
+</svg>

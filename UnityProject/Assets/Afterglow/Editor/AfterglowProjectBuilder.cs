@@ -95,7 +95,6 @@ namespace Afterglow.Editor
             string sourceRoot = Path.Combine(Application.dataPath, "Afterglow");
             string outputRoot = Path.GetDirectoryName(buildPath);
             CopyDocumentationFile(sourceRoot, outputRoot, "LEESMIJ.md", "LEESMIJ.txt");
-            CopyDocumentationFile(sourceRoot, outputRoot, "KWALITEITSRAPPORT.md", "KWALITEITSRAPPORT.txt");
         }
 
         private static void CopyDocumentationFile(string sourceRoot, string outputRoot, string sourceName, string outputName)

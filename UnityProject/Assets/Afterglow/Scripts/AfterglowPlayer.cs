@@ -37,7 +37,6 @@ namespace Afterglow
         private int health = 4;
         private int facing = 1;
         private int chain;
-        private int bestChain;
         private int ultimateCharge;
         private bool onGround;
         private bool wasGrounded;
@@ -65,15 +64,13 @@ namespace Afterglow
         private WeaponSystem weaponSystem;
         private AfterglowMemory nearbyMemory;
         private AfterglowShortcut nearbyShortcut;
+        private AfterglowBreakableWall nearbyBreakableWall;
 
         public event Action<int, int> HealthChanged;
-        public event Action<int, bool> ChainChanged;
         public bool IsDead => dead;
         public bool IsGrounded => onGround;
         public int Health => health;
         public int MaximumHealth { get; private set; } = 4;
-        public int CurrentChain => chain;
-        public int BestChain => bestChain;
         public Transform Visual => visual;
         public bool HasStartedGameplay => gameplayStarted;
         public int UltimatePercent => ultimateCharge;
@@ -143,22 +140,22 @@ namespace Afterglow
                                (gamepad != null && gamepad.buttonSouth.wasPressedThisFrame);
             bool dashPressed = (keyboard != null && (keyboard.leftShiftKey.wasPressedThisFrame || keyboard.rightShiftKey.wasPressedThisFrame)) ||
                                (gamepad != null && gamepad.buttonEast.wasPressedThisFrame);
-            bool markPressed = (keyboard != null && keyboard.qKey.wasPressedThisFrame) || (gamepad != null && gamepad.leftShoulder.wasPressedThisFrame);
             bool interactPressed = keyboard != null && keyboard.eKey.wasPressedThisFrame;
             jumpHeld = (keyboard != null && keyboard.spaceKey.isPressed) ||
                        (gamepad != null && gamepad.buttonSouth.isPressed);
 
-            if (!gameplayStarted && (moveInput.sqrMagnitude > .04f || jumpPressed || dashPressed || markPressed))
+            if (!gameplayStarted && (moveInput.sqrMagnitude > .04f || jumpPressed || dashPressed))
                 gameplayStarted = true;
 
             if (jumpPressed) jumpBuffer = .16f;
-            if (chain > 0 && chainTimer <= 0f) SetChain(0, false);
+            if (chain > 0 && chainTimer <= 0f) SetChain(0);
             if (markedTarget != null && markRemaining <= 0f) ClearMark();
             nearbyMemory = FindNearbyMemory();
             nearbyShortcut = nearbyMemory == null ? FindNearbyShortcut() : null;
-            ui?.SetInteractionHint(nearbyMemory != null || nearbyShortcut != null, nearbyShortcut != null);
+            nearbyBreakableWall = nearbyMemory == null && nearbyShortcut == null ? FindNearbyBreakableWall() : null;
+            ui?.SetInteractionHint(nearbyMemory != null || nearbyShortcut != null || nearbyBreakableWall != null,
+                nearbyShortcut != null, nearbyBreakableWall != null);
             if (dashPressed) TryDashOrPerfectRebound();
-            if (markPressed) TryMarkTarget();
             if (interactPressed) Interact();
             if (waitingForReboundTiming && reboundWindow <= 0f) CompleteRebound(false);
             // Coyote time was present in the controller but unreachable: the old outer
@@ -320,6 +317,11 @@ namespace Afterglow
 
         public void FireSecondary()
         {
+            if (ultimateCharge >= 100)
+            {
+                FireUltimate();
+                return;
+            }
             if (secondaryCooldown > 0f || dead) return;
             secondaryCooldown = 3.2f;
             const float radius = 4.7f;
@@ -358,7 +360,7 @@ namespace Afterglow
         {
             if (ultimateCharge < 100)
             {
-                ui?.Notify("WORTELHART NOG NIET VOL  •  VUUR, MARK EN REBOUND", new Color(.69f, .8f, .83f), 1.4f);
+                ui?.Notify("WORTELHART LAADT OP MET ELKE TREFFER", new Color(.69f, .8f, .83f), 1.4f);
                 return;
             }
             ultimateCharge = 0;
@@ -383,7 +385,7 @@ namespace Afterglow
             foreach (var projectile in FindObjectsByType<AfterglowPulseProjectile>())
                 if (projectile.IsHostile && Vector2.Distance(projectile.transform.position, body.position) <= 9f) projectile.Disrupt();
             ui?.PlayPulseWave(body.position, 9f, new Color(.87f, .71f, .42f));
-            ui?.Notify("WORTELHART ONTGRENDELD  •  DE RELIEK SLAAT TERUG", new Color(.94f, .82f, .59f), 2f);
+            ui?.Notify("WORTELHART ONTGRENDELD  •  RMB ONTLAAST DE KRACHT", new Color(.94f, .82f, .59f), 2f);
             AfterglowAudio.Instance?.Play("ultimate", .9f);
             UpdateUltimateUI();
         }
@@ -420,7 +422,32 @@ namespace Afterglow
                 nearbyShortcut.TryUse(this);
                 return;
             }
+            if (nearbyBreakableWall != null)
+            {
+                nearbyBreakableWall.Interact();
+                nearbyBreakableWall = null;
+                ui?.SetInteractionHint(false);
+                return;
+            }
             ui?.Notify("NIETS OM MEE TE INTERAGEREN", new Color(.69f, .65f, .56f), 1f);
+        }
+
+        private AfterglowBreakableWall FindNearbyBreakableWall()
+        {
+            var filter = new ContactFilter2D { useTriggers = true, useLayerMask = false };
+            int count = Physics2D.OverlapCircle(body.position, 1.7f, filter, MarkBuffer);
+            AfterglowBreakableWall best = null;
+            float bestDistance = float.PositiveInfinity;
+            for (int i = 0; i < count; i++)
+            {
+                Collider2D collider = MarkBuffer[i]; MarkBuffer[i] = null;
+                if (collider == null) continue;
+                AfterglowBreakableWall wall = collider.GetComponentInParent<AfterglowBreakableWall>();
+                if (wall == null || wall.IsBroken) continue;
+                float distance = ((Vector2)wall.transform.position - body.position).sqrMagnitude;
+                if (distance < bestDistance) { best = wall; bestDistance = distance; }
+            }
+            return best;
         }
 
         private AfterglowShortcut FindNearbyShortcut()
@@ -463,7 +490,7 @@ namespace Afterglow
             if (target == null || target != markedTarget) return;
             AddUltimateCharge(charged ? 24 : 15);
             ui?.PlayImpactEffect(position, new Color(.83f, .72f, .45f));
-            ui?.Notify("PULSMERK RESONEERT  •  DE REBOUND IS GELADEN", new Color(.83f, .72f, .45f), 1.05f);
+            ui?.Notify("OATHROOT RESONEERT  •  WORTELHART GELADEN", new Color(.83f, .72f, .45f), 1.05f);
             AfterglowAudio.Instance?.Play("markhit", 1f);
         }
 
@@ -600,7 +627,6 @@ namespace Afterglow
             dashHasMarkedTarget = false;
             chain = chainTimer > 0f ? chain + 1 : 1;
             chainTimer = perfect ? 2.8f : 2.1f;
-            bestChain = Mathf.Max(bestChain, chain);
 
             Vector2 normal = impactTarget.SurfaceNormal(body.position, impactPoint, impactIncoming);
             Vector2 fixedDirection = impactTarget.FixedReboundDirection;
@@ -625,7 +651,7 @@ namespace Afterglow
             jumpCutActive = false;
             invulnerability = Mathf.Max(invulnerability, .24f);
             wasGrounded = false;
-            SetChain(chain, perfect);
+            SetChain(chain);
             AddUltimateCharge(perfect ? 18 : 12);
             lanternSignal?.Pulse(perfect);
             hit.NotifyRebound(this, incoming, outgoing, chain, perfect);
@@ -650,11 +676,9 @@ namespace Afterglow
             ui?.ClearMarkedTarget();
         }
 
-        private void SetChain(int value, bool perfect)
+        private void SetChain(int value)
         {
             chain = value;
-            ChainChanged?.Invoke(chain, perfect);
-            ui?.UpdateChain(chain, perfect);
         }
 
         private void TryJump()

@@ -7,28 +7,31 @@ namespace Afterglow
     [RequireComponent(typeof(Rigidbody2D), typeof(Collider2D), typeof(AfterglowReboundTarget))]
     public class BossController : MonoBehaviour, IAfterglowReboundReceiver
     {
-        private const int MasteryHitsRequired = 3;
+        private const int MaxHealth = 6;
+        private const int PhaseCount = 3;
+
         private BossStyle style;
         private AfterglowPlayer player;
         private AfterglowUI ui;
         private AfterglowExit exit;
         private AfterglowReboundTarget reboundTarget;
         private Rigidbody2D body;
-        private float attackTimer = 1.25f;
+        private float attackTimer = 1.1f;
         private float windupTimer;
         private float exposedTimer;
         private float arenaCenter;
+        private float baseY;
         private float attackCenterX;
-        private int requiredChain;
-        private int masteryHits;
+        private float attackHalfWidth;
+        private float armorFeedbackTimer;
+        private int health = MaxHealth;
         private int attackPattern;
+        private int activePattern;
         private int combatPhase = 1;
         private bool dead;
         private bool fightStarted;
         private bool exposed;
-        private bool haldenBellDrop;
-        private bool seraRootSnare;
-        private bool eclipseStrike;
+        private bool attackHitsGround;
         private SpriteRenderer[] renderers;
 
         public void Configure(BossStyle bossStyle, AfterglowPlayer hero, AfterglowUI gameUi, AfterglowExit stageExit, int stage)
@@ -38,7 +41,8 @@ namespace Afterglow
             ui = gameUi;
             exit = stageExit;
             arenaCenter = transform.position.x;
-            requiredChain = Mathf.Clamp(stage + 1, 1, 3);
+            baseY = transform.position.y + .15f;
+            health = MaxHealth;
             reboundTarget = GetComponent<AfterglowReboundTarget>();
             if (reboundTarget != null)
             {
@@ -68,9 +72,12 @@ namespace Afterglow
             }
 
             float dt = Time.deltaTime;
-            float bob = Mathf.Sin(Time.time * (style == BossStyle.Eclipse ? 2.4f : 1.5f)) * .18f;
-            transform.position = new Vector3(arenaCenter + Mathf.Sin(Time.time * .55f) * .35f, 2.45f + bob, 0f);
+            float pace = 1.45f + combatPhase * .2f;
+            float sway = style == BossStyle.Eclipse ? 1.15f : style == BossStyle.CinderMatriarch ? .6f : .32f;
+            transform.position = new Vector3(arenaCenter + Mathf.Sin(Time.time * .52f + (int)style) * sway,
+                baseY + Mathf.Sin(Time.time * pace) * .2f, 0f);
 
+            armorFeedbackTimer -= dt;
             if (windupTimer > 0f)
             {
                 windupTimer -= dt;
@@ -87,22 +94,25 @@ namespace Afterglow
                 if (attackTimer <= 0f) StartAttack();
             }
 
-            if (renderers != null)
+            if (renderers == null) return;
+            Color tint = exposed
+                ? Color.Lerp(new Color(1f, .88f, .55f), Color.white, Mathf.PingPong(Time.time * 5f, .3f))
+                : windupTimer > 0f
+                    ? Color.Lerp(Color.white, new Color(1f, .34f, .2f), .58f + Mathf.Sin(Time.time * 18f) * .12f)
+                    : Color.white;
+            foreach (SpriteRenderer renderer in renderers)
             {
-                Color tint = exposed ? new Color(.98f, .76f, .45f) : windupTimer > 0f ? new Color(.72f, .27f, .22f) : Color.white;
-                foreach (var renderer in renderers)
-                {
-                    renderer.flipX = player.transform.position.x < transform.position.x;
-                    renderer.color = Color.Lerp(renderer.color, tint, dt * 7f);
-                }
+                if (renderer == null) continue;
+                renderer.flipX = player.transform.position.x < transform.position.x;
+                renderer.color = Color.Lerp(renderer.color, tint, dt * 9f);
             }
         }
 
         private void BeginFight()
         {
             fightStarted = true;
-            attackTimer = .8f;
-            ui?.ShowBossMastery(BossName(), 0, MasteryHitsRequired, requiredChain);
+            attackTimer = .75f;
+            ui?.ShowBossHealth(BossName(), health, MaxHealth, combatPhase, PhaseCount);
             ui?.BeginBossCinematic();
             string introduction = style == BossStyle.Vandal
                 ? "HALDEN LAAT ELKE BELSLAG BETALEN"
@@ -114,193 +124,203 @@ namespace Afterglow
 
         private void StartAttack()
         {
+            activePattern = attackPattern++ % 3;
             attackCenterX = transform.position.x;
+            attackHalfWidth = 0f;
+            attackHitsGround = true;
+            string tell;
+
             if (style == BossStyle.Vandal)
             {
-                // Halden's tells alternate between a tolling floor wave and a bell drop
-                // aimed at Mara. During the tell, one bell dash can counter his attack.
-                haldenBellDrop = attackPattern++ % 2 == 1;
-                if (haldenBellDrop)
+                if (activePattern == 0)
+                {
+                    attackHalfWidth = 6.1f;
+                    tell = "DE KLOKSLAG ROLT OVER DE VLOER  •  SPRING EN BLIJF LOPEN";
+                }
+                else if (activePattern == 1)
                 {
                     attackCenterX = player.transform.position.x;
-                    ui?.WarnFloor(attackCenterX - 1.4f, attackCenterX + 1.4f);
-                    ui?.Notify("HALDENS KLOKSLAG  •  SPRING, OF KAATS HET PERFECT TERUG", new Color(.69f, .27f, .2f), 1.2f);
+                    attackHalfWidth = 1.35f;
+                    tell = "HALDEN LAAT ZIJN KLOK VALLEN  •  VERLAAT HET LICHT EN WIJK UIT";
                 }
                 else
                 {
-                    ui?.WarnFloor(attackCenterX - 6f, attackCenterX + 6f);
-                    ui?.Notify("DE LAATSTE TOL  •  SPRING OVER DE GOLF OF KEER DE BELSLAG", new Color(.69f, .27f, .2f), 1.2f);
+                    attackHitsGround = false;
+                    tell = "DRIE BELSCHERVEN KOMEN OP JE AF  •  BLIJF IN BEWEGING";
                 }
             }
             else if (style == BossStyle.CinderMatriarch)
             {
-                // Sera alternates a precise root snare with a broad root surge.
-                // The first punishes standing still; the second rewards a clean jump.
-                seraRootSnare = attackPattern++ % 2 == 0;
-                if (seraRootSnare) attackCenterX = player.transform.position.x;
-                float halfWidth = seraRootSnare ? 1.45f : 4.5f;
-                ui?.WarnFloor(attackCenterX - halfWidth, attackCenterX + halfWidth);
-                ui?.Notify(seraRootSnare ? "WORTELKLEM  •  VERLAAT DE GEMERKTE PLEK" : "WORTELGOLF  •  SPRING OVER DE BREDE AANVAL", new Color(.69f, .27f, .2f), 1.1f);
-            }
-            else if (style == BossStyle.Eclipse)
-            {
-                eclipseStrike = attackPattern++ % 2 == 1;
-                if (eclipseStrike)
+                if (activePattern == 0)
                 {
-                    ui?.WarnFloor(attackCenterX - 1.55f, attackCenterX + 1.55f);
-                    ui?.Notify("STILTESLAG  •  REBOUND OPZIJ OF OMHOOG", new Color(.69f, .27f, .2f), 1f);
+                    attackCenterX = player.transform.position.x;
+                    attackHalfWidth = 1.5f;
+                    tell = "SERA SLUIT JE OP IN EEN WORTELKLEM  •  VERLAAT HET LICHT";
+                }
+                else if (activePattern == 1)
+                {
+                    attackHalfWidth = 4.2f;
+                    tell = "TWEE OUDE WORTELS BREKEN HET PAD OPEN  •  SPRING";
                 }
                 else
                 {
-                    ui?.WarnFloor(attackCenterX - 7.5f, attackCenterX + 7.5f);
-                    ui?.Notify("SCHADUWGOLF  •  SPRING OF REBOUND HOOG", new Color(.69f, .27f, .2f), 1f);
+                    attackHitsGround = false;
+                    tell = "DOORNSKIEMEN ZOEKEN JE OP  •  BLIJF LOPEN";
                 }
             }
             else
             {
-                float reach = style == BossStyle.Eclipse ? 7.5f : 6f;
-                ui?.WarnFloor(attackCenterX - reach, attackCenterX + reach);
-                ui?.Notify("GOLVENDE INSLAAG  •  SPRING OF REBOUND ER OVERHEEN", new Color(.69f, .27f, .2f), .9f);
+                if (activePattern == 0)
+                {
+                    attackHalfWidth = 7.2f;
+                    tell = "DE SCHADUW GOLFT DOOR DE ZAAL  •  SPRING LAAT";
+                }
+                else if (activePattern == 1)
+                {
+                    attackCenterX = player.transform.position.x;
+                    attackHalfWidth = 1.65f;
+                    tell = "ASTER SNIJDT DE OPLICHTENDE PLEK DOOR  •  VERPLAATS JE";
+                }
+                else
+                {
+                    attackHitsGround = false;
+                    tell = "DE GODMACHINE VUURT EEN ROODKLEURIGE SALVO AF  •  WIJK UIT";
+                }
             }
-            float phaseSpeedUp = (combatPhase - 1) * .12f;
-            windupTimer = Mathf.Max(.32f, (style == BossStyle.Vandal ? 1.05f : style == BossStyle.CinderMatriarch ? .72f : .48f) - phaseSpeedUp);
-            if (reboundTarget != null) reboundTarget.SetCanBeMarked(style == BossStyle.Vandal);
+
+            if (attackHitsGround) ui?.WarnFloor(attackCenterX - attackHalfWidth, attackCenterX + attackHalfWidth);
+            ui?.Notify(tell, new Color(.83f, .34f, .25f), 1.2f);
+            float baseWindup = style == BossStyle.Vandal ? 1.03f : style == BossStyle.CinderMatriarch ? .88f : .78f;
+            windupTimer = Mathf.Max(.48f, baseWindup - (combatPhase - 1) * .15f);
             exposed = false;
+            if (reboundTarget != null) reboundTarget.SetCanBeMarked(false);
         }
 
         private void ResolveAttack()
         {
-            float dx = Mathf.Abs(player.transform.position.x - attackCenterX);
-            bool hit = style == BossStyle.CinderMatriarch
-                ? dx < (seraRootSnare ? 1.55f : 4.5f) && player.transform.position.y < 3.5f
-                : style == BossStyle.Vandal && haldenBellDrop
-                    ? dx < 1.4f && player.transform.position.y < 4.6f
-                : style == BossStyle.Eclipse && eclipseStrike
-                    ? dx < 1.55f && player.transform.position.y < 5.2f
-                    : dx < (style == BossStyle.Eclipse ? 7.5f : 6f) && player.IsGrounded;
+            bool hit = attackHitsGround &&
+                Mathf.Abs(player.transform.position.x - attackCenterX) < attackHalfWidth &&
+                player.transform.position.y < 3.65f;
             if (hit) player.TakeDamage(style == BossStyle.Eclipse ? 2 : 1, transform.position);
+
             LaunchBossPattern();
-            ui?.PlayBossAttackImpact(transform.position, style == BossStyle.CinderMatriarch ? new Color(.54f,.78f,.4f) : style == BossStyle.Eclipse ? new Color(.83f,.29f,.45f) : new Color(.87f,.59f,.34f));
+            Color impactColor = style == BossStyle.CinderMatriarch ? new Color(.54f, .78f, .4f) :
+                style == BossStyle.Eclipse ? new Color(.83f, .29f, .45f) : new Color(.87f, .59f, .34f);
+            ui?.PlayBossAttackImpact(new Vector2(attackCenterX, .3f), impactColor);
             exposed = true;
-            exposedTimer = style == BossStyle.Eclipse ? .95f : style == BossStyle.Vandal ? 1.45f : 1.25f;
+            exposedTimer = combatPhase == PhaseCount ? 1.35f : 1.75f;
             if (reboundTarget != null) reboundTarget.SetCanBeMarked(true);
-            ui?.Notify(style == BossStyle.Vandal
-                ? "HALDEN IS OPEN  •  DASH OP ZIJN ZEGEL"
-                : style == BossStyle.CinderMatriarch
-                    ? "DE WORTELS LATEN LOS  •  DASH OP HET ZEGEL"
-                    : "DE STILTE BREEKT  •  DASH OP HET ZEGEL",
-                new Color(.82f, .68f, .42f), 1.35f);
+            ui?.Notify("KERN BLOOT  •  SCHIET NU", new Color(.95f, .82f, .49f), 1.35f);
         }
 
         private void LaunchBossPattern()
         {
             Vector2 origin = transform.position;
             Vector2 toPlayer = (Vector2)player.transform.position + Vector2.up * .8f - origin;
-            float angle = Mathf.Atan2(toPlayer.y, toPlayer.x);
-            int count;
-            float spread;
-            float speed;
-            Color color;
+            float aim = Mathf.Atan2(toPlayer.y, toPlayer.x);
+            Color color = style == BossStyle.CinderMatriarch ? new Color(.54f, .77f, .43f) :
+                style == BossStyle.Eclipse ? new Color(.88f, .33f, .5f) : new Color(.88f, .59f, .34f);
+
             if (style == BossStyle.Vandal)
             {
-                count = haldenBellDrop ? 2 + masteryHits + combatPhase : 3 + masteryHits + combatPhase;
-                spread = haldenBellDrop ? .3f : .58f;
-                speed = 7.2f + masteryHits * .7f + (combatPhase - 1) * .55f;
-                color = new Color(.88f,.59f,.34f);
+                int count = activePattern == 2 ? (combatPhase == 3 ? 5 : 3) : combatPhase >= 2 ? 3 : 2;
+                FireFan(origin, aim, count, activePattern == 2 ? .56f : .32f, 7f + combatPhase * .45f, 1, color);
             }
             else if (style == BossStyle.CinderMatriarch)
             {
-                count = 3 + masteryHits + combatPhase;
-                spread = .64f;
-                speed = 6.7f + masteryHits * .55f + (combatPhase - 1) * .55f;
-                color = new Color(.54f,.77f,.43f);
+                // A low pair spreads across the floor so the player can jump through the gap.
+                float lowAim = Mathf.Atan2(-.12f, player.transform.position.x < origin.x ? -1f : 1f);
+                FireFan(origin, lowAim, activePattern == 2 ? 2 + combatPhase : 2, .3f, 6.2f + combatPhase * .4f, 1, color);
             }
             else
             {
-                count = 5 + masteryHits * 2 + combatPhase;
-                spread = .82f;
-                speed = 8.1f + masteryHits * .5f + (combatPhase - 1) * .55f;
-                color = new Color(.88f,.33f,.5f);
+                // Aster's shots are fast and narrow. Read the launch point, then sidestep.
+                FireFan(origin, aim, activePattern == 2 ? 3 + combatPhase : 2 + combatPhase, .42f, 8.1f + combatPhase * .55f, 1, color);
             }
+        }
+
+        private void FireFan(Vector2 origin, float angle, int count, float spread, float speed, int damage, Color color)
+        {
             for (int i = 0; i < count; i++)
             {
                 float fraction = count <= 1 ? .5f : i / (float)(count - 1);
                 float shotAngle = angle + Mathf.Lerp(-spread, spread, fraction);
                 Vector2 direction = new Vector2(Mathf.Cos(shotAngle), Mathf.Sin(shotAngle));
-                AfterglowPulseProjectile.FireHostile(origin + direction * .82f, direction, speed, style == BossStyle.Eclipse ? 2 : 1, color);
+                AfterglowPulseProjectile.FireHostile(origin + direction * .82f, direction, speed, damage, color);
             }
         }
 
         public void ReceiveWeaponHit(int amount, bool charged, AfterglowPlayer attacker)
         {
             if (dead) return;
-            if (windupTimer > 0f)
+            if (!exposed)
             {
-                windupTimer = Mathf.Min(1.5f, windupTimer + (charged ? .3f : .1f));
-                ui?.PlayImpactEffect(transform.position, charged ? new Color(.58f,.9f,1f) : new Color(.54f,.72f,.82f));
+                if (armorFeedbackTimer <= 0f)
+                {
+                    armorFeedbackTimer = .8f;
+                    ui?.PlayImpactEffect(transform.position, new Color(.65f, .69f, .72f));
+                    ui?.Notify("DE WACHTER IS GESLOTEN  •  ONTSNAP AAN DE AANVAL", new Color(.77f, .73f, .65f), 1.15f);
+                }
+                return;
             }
-            if (exposed)
+
+            // A charged shot is a meaningful punish, while rapid fire still works.
+            int damage = Mathf.Min(2, Mathf.Max(1, amount));
+            health = Mathf.Max(0, health - damage);
+            exposedTimer = Mathf.Max(.4f, exposedTimer - .34f);
+            ui?.PlayImpactEffect(transform.position, charged ? new Color(.74f, .97f, 1f) : new Color(.82f, .91f, .9f));
+            int nextPhase = Mathf.Clamp((MaxHealth - health) / 2 + 1, 1, PhaseCount);
+            if (health <= 0)
             {
-                exposedTimer = Mathf.Min(style == BossStyle.Eclipse ? 1.5f : 2f, exposedTimer + (charged ? .2f : .08f));
-                ui?.PlayImpactEffect(transform.position, charged ? new Color(.72f,.94f,1f) : new Color(.66f,.8f,.85f));
+                Defeat();
+                return;
             }
-            if (charged && !exposed && windupTimer <= 0f)
-                ui?.Notify("DE ZEGELHOUDER SPANT ZICH IN  •  MARK EN REBOUND OM HET ZEGEL TE BREKEN", new Color(.8f,.68f,.48f), 1.2f);
+
+            if (nextPhase > combatPhase)
+            {
+                combatPhase = nextPhase;
+                exposed = false;
+                exposedTimer = 0f;
+                attackTimer = .48f;
+                if (reboundTarget != null) reboundTarget.SetCanBeMarked(false);
+                ui?.BossPhaseChange(PhaseMessage());
+                Color phaseColor = style == BossStyle.CinderMatriarch ? new Color(.54f, .84f, .48f) :
+                    style == BossStyle.Eclipse ? new Color(.91f, .32f, .49f) : new Color(.94f, .7f, .38f);
+                ui?.PlayPulseWave(transform.position, 5.8f, phaseColor);
+            }
+            ui?.UpdateBossHealth(BossName(), health, MaxHealth, combatPhase, PhaseCount);
         }
+
+        private string PhaseMessage() => style == BossStyle.Vandal
+            ? "HALDEN BREEKT ZIJN EIGEN BEL  •  FASE " + combatPhase
+            : style == BossStyle.CinderMatriarch
+                ? "DE WORTELS KEREN ZICH TEGEN SERA  •  FASE " + combatPhase
+                : "ASTER VERLIEST DE MAAT  •  FASE " + combatPhase;
 
         private void CloseWindow()
         {
             exposed = false;
             if (reboundTarget != null) reboundTarget.SetCanBeMarked(false);
-            attackTimer = style == BossStyle.Eclipse ? .75f : 1.05f;
+            attackTimer = combatPhase == PhaseCount ? .36f : .62f;
         }
 
         public void OnRebound(AfterglowPlayer reboundPlayer, Vector2 incoming, Vector2 outgoing, int chain, bool perfect)
         {
-            if (dead) return;
-
-            // Halden's long, readable wind-up is a genuine counter window: a perfect
-            // Last Bell rebound interrupts the attack instead of merely avoiding it.
-            if (style == BossStyle.Vandal && windupTimer > 0f && perfect)
+            if (dead || !perfect) return;
+            if (windupTimer > 0f)
             {
                 windupTimer = 0f;
+                attackHitsGround = false;
                 exposed = true;
-                exposedTimer = 1.45f;
+                exposedTimer = 1.9f;
                 if (reboundTarget != null) reboundTarget.SetCanBeMarked(true);
-                ui?.BossPhaseChange("DE BELSLAG KEERT OM  •  HALDEN IS OPEN");
-                AfterglowAudio.Instance?.Play("win", 1.08f);
-            }
-            else if (!exposed)
-            {
-                if (style == BossStyle.Vandal && windupTimer > 0f)
-                {
-                    ui?.Notify("HALDEN HOUDT STAND  •  DRUK SHIFT PRECIES OP DE BELSLAG", new Color(.75f, .43f, .3f), 1.3f);
-                    ui?.PlayImpactEffect(transform.position, new Color(1f, .54f, .48f));
-                }
+                Color counterColor = style == BossStyle.CinderMatriarch ? new Color(.54f, .84f, .48f) :
+                    style == BossStyle.Eclipse ? new Color(.91f, .32f, .49f) : new Color(.94f, .7f, .38f);
+                ui?.PlayPulseWave(transform.position, 4.8f, counterColor);
+                ui?.BossPhaseChange("DE BELSLAG KEERT OM  •  KERN OPEN");
                 return;
             }
-
-            if (chain < requiredChain)
-            {
-                ui?.Notify("KETEN TE KORT  •  MINIMAAL " + requiredChain, new Color(.75f, .43f, .3f), 1.5f);
-                ui?.PlayImpactEffect(transform.position, new Color(1f, .54f, .48f));
-                // Leave the seal open. The player can rebound away, build the required
-                // chain, and return before the short vulnerability window closes.
-                return;
-            }
-
-            CloseWindow();
-            masteryHits++;
-            ui?.UpdateBossMastery(masteryHits, MasteryHitsRequired);
-            if (masteryHits < MasteryHitsRequired)
-            {
-                combatPhase = Mathf.Min(3, masteryHits + 1);
-                ui?.BossPhaseChange(BossName() + "  •  FASE " + combatPhase + " — HET RIJK SLAAT TERUG");
-            }
-            ui?.PlayImpactEffect(transform.position, perfect ? new Color(.55f, 1f, .76f) : new Color(.55f, .88f, 1f));
-            ui?.Notify((perfect ? "PERFECTE KETEN" : "ZUIVERE KETEN") + "  •  PATROON GEBROKEN " + masteryHits + " / " + MasteryHitsRequired,
-                new Color(.82f, .68f, .42f), 1.6f);
-            if (masteryHits >= MasteryHitsRequired) Defeat();
+            if (exposed) ReceiveWeaponHit(1, false, reboundPlayer);
         }
 
         private void Defeat()
@@ -308,7 +328,7 @@ namespace Afterglow
             if (dead) return;
             dead = true;
             ui?.PlayEnemyBurst(transform.position);
-            ui?.HideBossMastery();
+            ui?.HideBossHealth();
             ui?.BossDefeated(BossName());
             if (exit != null) exit.Unlock();
             Destroy(gameObject);

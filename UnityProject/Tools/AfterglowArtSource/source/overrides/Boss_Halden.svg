@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="720" viewBox="0 0 640 720">
+  <defs>
+    <linearGradient id="iron" x2=".8" y2="1"><stop stop-color="#55505a"/><stop offset=".42" stop-color="#302e38"/><stop offset="1" stop-color="#161a23"/></linearGradient>
+    <linearGradient id="bronze" x2=".7" y2="1"><stop stop-color="#c49b5c"/><stop offset=".38" stop-color="#80603d"/><stop offset="1" stop-color="#3d3330"/></linearGradient>
+    <linearGradient id="bell" x2="0" y2="1"><stop stop-color="#b78b50"/><stop offset=".32" stop-color="#6e523b"/><stop offset="1" stop-color="#2b292e"/></linearGradient>
+    <radialGradient id="eye"><stop stop-color="#ffe2a0"/><stop offset=".4" stop-color="#d35a4f"/><stop offset="1" stop-color="#731d36"/></radialGradient>
+  </defs>
+  <!-- A collapsed bell hangs from Halden's left shoulder; the hammer is his right arm. -->
+  <path d="M181 273Q104 306 93 427L78 601Q160 619 229 569L279 445Z" fill="#3b3037" stroke="#151922" stroke-width="18"/>
+  <path d="M115 384Q65 428 71 516t-53 125q95 35 167-25 49-41 43-111L204 389Z" fill="#542c3c" stroke="#181b24" stroke-width="15"/>
+  <path d="M117 451q43 58 6 140m33-119q35 55 9 101m-69 35q42 6 71-18" fill="none" stroke="#bb8b56" stroke-width="6" opacity=".85"/>
+  <path d="M212 278Q165 201 199 111 225 34 332 28q114 11 131 102l-47 145-73 47-132-9Z" fill="url(#iron)" stroke="#111720" stroke-width="20"/>
+  <path d="M210 132Q259 55 368 76l70 62-40 108-159 12Z" fill="url(#bronze)" stroke="#d1ad70" stroke-width="12"/>
+  <path d="M236 151 329 91l90 58-16 29-155 23Z" fill="#292b33" stroke="#4a4140" stroke-width="8"/>
+  <path d="M247 177q61-36 127-8l-15 31q-61 24-109 4Z" fill="#101722" stroke="#90744d" stroke-width="5"/>
+  <path d="M274 188q42-23 85-5" fill="none" stroke="#d34c4b" stroke-width="10"/>
+  <circle cx="325" cy="185" r="8" fill="url(#eye)"/>
+  <path d="m326 185 37-47m-44 49-4 44" stroke="#d9b772" stroke-width="5" stroke-linecap="round"/>
+  <path d="M293 215q44 12 85-6l-20 31h-59Z" fill="#181b23" stroke="#c09358" stroke-width="6"/>
+  <path d="M255 278Q313 315 422 266L472 472Q389 544 245 503L194 416Z" fill="url(#iron)" stroke="#b18a52" stroke-width="14"/>
+  <path d="M268 321q48 29 111 5m-125 43q70 33 145 6m-153 43q80 35 161 8" fill="none" stroke="#97784d" stroke-width="7"/>
+  <path d="M326 316q-31 41 1 80 34-39 3-80Z" fill="#982c44" stroke="#d6ad6b" stroke-width="7"/>
+  <circle cx="329" cy="354" r="11" fill="#ffe3a3"/>
+  <path d="M239 302 166 337l-44 115 46 39 86-98m171-120 67 3 59 109-50 44-82-98" fill="url(#iron)" stroke="#171b23" stroke-width="21"/>
+  <path d="M129 441 82 498l41 36 56-51m312-149 42 53-47 41-41-47" fill="none" stroke="#c3a068" stroke-width="8"/>
+  <!-- The suspended handbell and its broken rope are Halden's unmistakable profile. -->
+  <path d="M157 190v126m-19-92q19-47 38 0v68h-38m-13 0h65" fill="none" stroke="#c49b5c" stroke-width="9"/>
+  <path d="M119 293q-35 31-41 90l-22 114q54 30 102 1l18-122q-7-48-34-77Z" fill="url(#bell)" stroke="#d1ad70" stroke-width="11"/>
+  <path d="M95 354q30 14 65-3m-71 64q33 16 67 1m-63 57 59 1" fill="none" stroke="#d9b772" stroke-width="7"/>
+  <path d="M470 277q58 63 72 165" fill="none" stroke="#b18a52" stroke-width="13"/>
+  <path d="M521 426q-39 40-30 110 11 62 67 82 55-24 66-80 10-67-31-113-34-29-72 1Z" fill="url(#bell)" stroke="#d1ad70" stroke-width="13"/>
+  <path d="M536 474q24 16 46 0m-55 38q33 19 66 0m-52 46 40 1" fill="none" stroke="#d4ae6e" stroke-width="7"/>
+  <path d="M225 518 188 656l89 25 77-116 63 133 100-34-72-174" fill="#252732" stroke="#141821" stroke-width="18"/>
+  <path d="m183 638 92 20m81-76 51 81m73-146 48 118" fill="none" stroke="#aa8754" stroke-width="9"/>
+  <path d="M205 97q17-78 113-84 108 1 137 77l-52-26-90-23-59 35Z" fill="#252531" stroke="#c09a5d" stroke-width="11"/>
+  <path d="M275 53q37-56 78-3-39 47-78 3Z" fill="#a7434d" stroke="#e2bd74" stroke-width="8"/>
+</svg>

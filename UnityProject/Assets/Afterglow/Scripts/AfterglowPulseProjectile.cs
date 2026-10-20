@@ -114,6 +114,13 @@ namespace Afterglow
             }
 
             if (other.GetComponentInParent<AfterglowPlayer>() != null) return;
+            var breakableWall = other.GetComponentInParent<AfterglowBreakableWall>();
+            if (breakableWall != null)
+            {
+                breakableWall.HitByWeapon(transform.position, charged);
+                Destroy(gameObject);
+                return;
+            }
             var enemy = other.GetComponentInParent<AfterglowEnemy>();
             if (enemy != null)
             {

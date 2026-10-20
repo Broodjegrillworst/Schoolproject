@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="720" viewBox="0 0 640 720">
+  <defs>
+    <linearGradient id="bark" x2=".8" y2="1"><stop stop-color="#59604a"/><stop offset=".42" stop-color="#343a35"/><stop offset="1" stop-color="#1b2424"/></linearGradient>
+    <linearGradient id="leaf" x2="0" y2="1"><stop stop-color="#819162"/><stop offset="1" stop-color="#354937"/></linearGradient>
+    <radialGradient id="seed"><stop stop-color="#ffd890"/><stop offset=".3" stop-color="#cb6a58"/><stop offset="1" stop-color="#5b233f"/></radialGradient>
+  </defs>
+  <!-- Sera's crown grows from her back like a dead tree caught in a storm. -->
+  <path d="M304 263C245 206 219 149 178 111 139 75 98 80 68 57 88 125 127 173 206 195M333 260c14-83 7-141-17-218m21 182c43-66 92-109 147-133 41-18 73-20 115-52-22 67-78 121-155 147" fill="none" stroke="#322f2b" stroke-width="32" stroke-linecap="round"/>
+  <path d="M304 263C245 206 219 149 178 111 139 75 98 80 68 57 88 125 127 173 206 195M333 260c14-83 7-141-17-218m21 182c43-66 92-109 147-133 41-18 73-20 115-52-22 67-78 121-155 147" fill="none" stroke="#8c7950" stroke-width="5" opacity=".85"/>
+  <path d="M231 228Q181 286 145 398L69 636q92 38 181-13l71-121 112 129q101 25 157-23L497 365q-20-106-95-150Z" fill="url(#bark)" stroke="#151d1d" stroke-width="20"/>
+  <path d="M205 326Q131 376 114 512m131-159q-39 109-68 229m223-250q14 108 61 206m-99-177q60 99 78 171" fill="none" stroke="#79694c" stroke-width="13" stroke-linecap="round"/>
+  <path d="M202 337q-84 4-105 75m346-75q80-13 127 40" fill="none" stroke="#a18a5b" stroke-width="7"/>
+  <!-- Seed-pod mask, pale antler branches, and one living eye. -->
+  <path d="M236 176Q258 82 327 62q85 12 107 119l-31 127q-66 59-146 2Z" fill="#485345" stroke="#151d1d" stroke-width="17"/>
+  <path d="M258 204Q279 128 331 117q63 15 80 90l-34 68q-48 28-92-1Z" fill="#292c30" stroke="#a48b58" stroke-width="9"/>
+  <path d="M275 216q46-33 99-7l-16 30q-42 20-77 0Z" fill="#111923"/>
+  <path d="M292 225q31-22 59-5" fill="none" stroke="#a93d4b" stroke-width="10"/>
+  <circle cx="324" cy="225" r="9" fill="url(#seed)"/>
+  <path d="M331 255q-37 20-69-4m74 18q19-6 30-17" fill="none" stroke="#c4a16a" stroke-width="6"/>
+  <path d="M240 301Q322 353 420 301L449 482Q363 560 216 510Z" fill="#34343a" stroke="#a18958" stroke-width="13"/>
+  <path d="M254 350q54 37 119 13m-139 34q82 42 164 11m-170 44q86 42 173 10" fill="none" stroke="#6f684d" stroke-width="8"/>
+  <path d="M324 330q-46 49-10 94 51-31 35-77-7-17-25-17Z" fill="url(#seed)" stroke="#d2af70" stroke-width="8"/>
+  <path d="M322 352q-14 27 4 47 24-24 5-45Z" fill="#ffe6a9"/>
+  <!-- Root tendrils reach farther than her arms; red seed lamps mark the tips. -->
+  <path d="M208 344Q131 340 112 432T57 533q55 43 114 4m277-183q90-28 126 44t33 144q-57 25-108-28M214 460q-78 53-121 152m315-151q96 41 146 145" fill="none" stroke="#4c3d32" stroke-width="20" stroke-linecap="round"/>
+  <path d="M208 344Q131 340 112 432T57 533m419-280q90-28 126 44t33 144M214 460q-78 53-121 152m315-151q96 41 146 145" fill="none" stroke="#9d8054" stroke-width="4"/>
+  <path d="M50 519q-32 37-7 70 34 15 58-10 14-33-10-56Z" fill="url(#seed)" stroke="#d1ac67" stroke-width="7"/>
+  <path d="M587 403q-33 31-17 65 31 16 56-10 12-33-11-56Z" fill="url(#seed)" stroke="#d1ac67" stroke-width="7"/>
+  <path d="M264 500 216 670q51 32 98 1l40-125m26-45 73 160q53 8 87-28l-78-145" fill="#242c2c" stroke="#151d1d" stroke-width="18"/>
+  <path d="m215 638 82 16m98-101 58 83m-190-466q-61-51-123-43m237 66q60-80 127-110" fill="none" stroke="#ad925e" stroke-width="7"/>
+  <path d="M257 292q-35-43-61-73m192 89q46-43 68-91" fill="none" stroke="#883b49" stroke-width="10"/>
+</svg>

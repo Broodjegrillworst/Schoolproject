@@ -4,7 +4,7 @@ Een 2D dark-fantasy-actieplatformspel over Mara Vale, een menselijke klokbewaars
 
 ## Openen
 
-1. Open het Unity-project `UnityProject` in Unity 6000.6.5f1.
+1. Open het Unity-project `C:\Users\Jaysk\Gamedevelopment junior` in Unity 6000.6.5f1.
 2. Open `Assets/Afterglow/Scenes/AfterglowMenu.unity`.
 3. Druk op Play en kies **Nieuw avontuur**.
 
@@ -15,13 +15,11 @@ Het hoofdstukverhaal verschijnt kort over de speelwereld; de besturing is vanaf 
 - **A / D** — naar links/rechts bewegen
 - **Spatie** — springen; vasthouden geeft een hogere sprong
 - **Linkermuisknop** — Oathroot-relictkanon vuren; vasthouden laadt een krachtig schot
-- **Rechtermuisknop** — Reliekstoot; onderbreekt vijanden dichtbij
-- **Shift** — dash; dash naar een met Q gemarkeerd doel of in je bewegingsrichting
-- **Q** — Pulsmerk op een rebound-doel; schieten op dit doel laadt extra wortelhartenergie
-- **Shift bij inslag** — perfecte rebound tijdens het korte timingvenster
-- **E** — een herinnering onderzoeken of een vrijgespeelde worteldoorgang gebruiken
-- **R** — Wortelhart-ultiem ontketenen zodra de lading 100% is
-- **Esc** — pauzemenu • **Tab** — routekaart • **M** — wereldkaart • **C** — personage
+- **Rechtermuisknop** — Reliekstoot; onderbreekt vijanden dichtbij. Bij een vol Wortelhart ontketent RMB de ultieme puls.
+- **E** — een herinnering onderzoeken, een worteldoorgang gebruiken of een gebarsten zegel openen
+- **Esc** — pauzemenu
+
+De optionele **Shift-dash** is een extra ontwijking; je hoeft geen doel te markeren of een rebound uit te voeren om te vechten of een baas te verslaan.
 
 ## Verhaal en gebieden
 
@@ -29,7 +27,7 @@ Het hoofdstukverhaal verschijnt kort over de speelwereld; de besturing is vanaf 
 2. **De Verzonken Ark** — een tempelboot ligt vast in het overstroomde ravijn, onder een verborgen waterval.
 3. **Het Wortelhart** — een wortelkathedraal en godmachine houden het oerwoud gevangen.
 
-Mara is een menselijke klokbewaarster met een rode familiesjaal en een erfkanon van zwart ijzer, messing en een levende blauwe kristalkern. Pulsschoten, markeringen en rebounds voeden het Wortelhart. De drie zegelhouders schieten eigen projectielpatronen die in latere fasen sneller en dichter worden; laden, positioneren en rebounden geven verschillende manieren om ze te counteren. Vijanden patrouilleren, reageren op zicht en wapengeluid, vechten en doorzoeken de laatst bekende plek van Mara. De drie herinneringen versterken Oathroot achtereenvolgens met een sterker kristal, een doorborend schot en extra kracht op geladen vuur. Elk verborgen herinneringsgebied opent ook een worteldoorgang naar een later deel van het hoofdstuk. De omgevingskunst is eigen SVG-vectorillustratie; de beeldbronnen staan in `Tools/AfterglowArtSource/source/overrides` en worden met `render.js` naar `Assets/Afterglow/Resources/Art` gerasterd. Het zijn geen geschilderde bitmap-texturen.
+Mara is een menselijke klokbewaarster met een rode familiesjaal, koperen lantaarn en erfkanon van zwart ijzer, messing en een levende blauwe kristalkern. Elke eindbaas heeft drie fases met een eigen aanvalspatroon en een korte opening: blijf bewegen, herken de waarschuwing en raak het blootgelegde hart. Een geladen schot doet meer schade, maar gewone pulsschoten blijven effectief. De drie herinneringen versterken Oathroot en openen elk een verborgen worteldoorgang. De omgevingskunst is eigen SVG-vectorillustratie; de beeldbronnen staan in `Tools/AfterglowArtSource/source/overrides` en worden met `render.js` naar `Assets/Afterglow/Resources/Art` gerasterd.
 
 ## Windows-build
 

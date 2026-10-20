@@ -27,7 +27,6 @@ namespace Afterglow
         {
             if (player == null || player.IsDead || AfterglowUI.IsPaused) return;
             Mouse mouse = Mouse.current;
-            Keyboard keyboard = Keyboard.current;
             bool pressed = mouse != null && mouse.leftButton.wasPressedThisFrame;
             bool held = mouse != null && mouse.leftButton.isPressed;
             bool released = mouse != null && mouse.leftButton.wasReleasedThisFrame;
@@ -57,8 +56,6 @@ namespace Afterglow
                 player.StartCombat();
                 player.FireSecondary();
             }
-            if (keyboard != null && keyboard.rKey.wasPressedThisFrame)
-                player.FireUltimate();
         }
     }
 }

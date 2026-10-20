@@ -155,7 +155,6 @@ namespace Afterglow
                 Spikes(18.1f, .35f, 1.8f, .9f, stage); Spikes(55f, .35f, 1.5f, .9f, stage); Spikes(72.4f, .35f, 1.7f, .9f, stage);
                 Checkpoint(35.5f, 1);
                 ReboundCeiling(51f, 9.35f, 7f, stage, accent);
-                CreateBellSeal(32f, 5.1f, 39f, stage);
             }
             else if (stage == 1)
             {
@@ -168,7 +167,6 @@ namespace Afterglow
                 Spikes(17.2f, .34f, 1.9f, .9f, stage); Laser(49.4f, 1.75f, 3.5f, stage); Laser(76.1f, 2f, 4f, stage);
                 Checkpoint(55f, 2);
                 ReboundCeiling(71f, 9.25f, 9f, stage, accent);
-                CreateBellSeal(38f, 4.65f, 45f, stage);
             }
             else
             {
@@ -184,10 +182,8 @@ namespace Afterglow
                 RiftSpinner(85f, 2.7f, stage);
                 Checkpoint(69f, 3);
                 ReboundCeiling(62f, 9.25f, 8f, stage, accent);
-                CreateBellSeal(41f, 4.7f, 48f, stage);
             }
             CreateMemoryRoom(stage, accent);
-            // Pulse relays open the rebound gate; platforms, walls, hazards and enemies remain valid chain targets.
         }
 
         private void CreateMemoryRoom(int stage, Color accent)
@@ -374,22 +370,6 @@ namespace Afterglow
             var sr = ceiling.GetComponent<SpriteRenderer>(); sr.drawMode = SpriteDrawMode.Sliced; sr.size = new Vector2(width, .48f);
             var collider = ceiling.AddComponent<BoxCollider2D>(); collider.size = new Vector2(width, .48f);
             ceiling.AddComponent<AfterglowReboundTarget>().Configure(ReboundTargetKind.Surface, "CEILING");
-        }
-
-        private void CreateBellSeal(float x, float y, float gateX, int stage)
-        {
-            var gate = SpriteObject("Sealed reliquary gate", new Vector3(gateX, 4.2f, 0f), AfterglowArt.Panel("rebound-gate-" + stage, new Color(.12f, .08f, .075f), new Color(.42f, .27f, .18f), new Color(.66f, .45f, .27f)), new Color(.66f, .48f, .3f, .68f), 5);
-            var gateSprite = gate.GetComponent<SpriteRenderer>(); gateSprite.drawMode = SpriteDrawMode.Sliced; gateSprite.size = new Vector2(.72f, 9.6f);
-            var gateCollider = gate.AddComponent<BoxCollider2D>(); gateCollider.size = new Vector2(.72f, 9.6f);
-            gate.AddComponent<AfterglowReboundTarget>().Configure(ReboundTargetKind.Surface, "GATE");
-
-            var relay = SpriteObject("Last-bell relic", new Vector3(x, y, 0f), AfterglowArt.Polygon("last-bell-relic", new Color(.22f, .14f, .085f), new Color(.78f, .6f, .31f), new Vector2(.5f, 1f), new Vector2(.78f, .28f), new Vector2(.66f, .04f), new Vector2(.34f, .04f), new Vector2(.22f, .28f)), Color.white, 12);
-            relay.transform.localScale = new Vector3(.78f, 1.1f, 1f);
-            var collider = relay.AddComponent<CircleCollider2D>(); collider.isTrigger = true; collider.radius = .58f;
-            var rings = SpriteObject("Bell inscription", relay.transform.position, AfterglowArt.Disc("pulse-relay-ring", new Color(.26f, .16f, .09f, .04f), new Color(.75f, .55f, .28f, .72f)), new Color(.68f, .51f, .29f, .62f), 11);
-            rings.transform.SetParent(relay.transform, true); rings.transform.localScale = new Vector3(1.5f, 1.5f, 1f);
-            relay.AddComponent<AfterglowReboundTarget>().Configure(ReboundTargetKind.Relay, "BELL RELIC", new Vector2(.28f, 1f));
-            relay.AddComponent<AfterglowPulseRelay>().Configure(gate, ui, new Vector2(.28f, 1f), stage + 1);
         }
 
         private void Spikes(float x, float y, float width, float height, int stage)
